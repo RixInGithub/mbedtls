@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# install |emsdk| before using this piece of crap idfk
+# https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended
+set -euo pipefail
+EXPORTS=_malloc,_free,_mbedtls_ssl_init
+(cd mbedtls && emmake make lib -j4)
+emcc mbedtls/library/*.a -o $1/mbedtls.js -s MODULARIZE=1 -s EXPORT_NAME=mbedtls -Oz -s EXPORTED_FUNCTIONS=$EXPORTS -s EXPORTED_RUNTIME_METHODS=addFunction,cwrap -s EXPORT_ES6=1 -s ENVIRONMENT=web # contrary to @urish's belief, we dont need to order anything in here! just feed it an expansion and you're good to go!
+mv $1/mbedtls.wasm $1/mbedtls.bin
